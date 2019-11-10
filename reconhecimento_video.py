@@ -105,12 +105,23 @@ class ReconhecedorObjetos:
             h = box[3]
             print(x, y, w, h, self.classes[class_ids[i]])
 
-    def loop(self):
+    def loop(self, n_iteracoes: int=None):
+        contagem = 0
+        tempos = []
         while 1:
+            comeco = time.clock()
             self.encontrar_mao()
             self.encontrar_objetos()
+            fim = time.clock()
+            tempos.append(fim - comeco)
+            if n_iteracoes is not None:
+                contagem += 1
+                if contagem >= n_iteracoes:
+                    return tempos
 
+import pandas as pd
 
-# o = ReconhecedorObjetos()
-# with o:
-#     o.loop()
+o = ReconhecedorObjetos()
+with o:
+    pd.DataFrame(o.loop(100)).to_csv('teste')
+
