@@ -11,6 +11,40 @@ def _get_output_layers(net):
     output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
     return output_layers
 
+class ObjetoAvistado():
+
+    traducao = {
+        'human': 'humano',
+        'hand': 'mão',
+        'phone': 'celular',
+        'banana': 'banana',
+        'apple': 'maçã',
+        'fork': 'garfo',
+        'bottle': 'garrafa'
+    }
+    nome = None
+
+    def __init__(self, saida_opencv: tuple):
+        nome_ingles = saida_opencv[-1]
+        self.nome = self.traducao[nome_ingles]
+        self.x_1 = saida_opencv[0]
+        self.y_1 = saida_opencv[1]
+        self.x_2 = saida_opencv[2] + self.x_1
+        self.y_2 = saida_opencv[3] + self.y_1
+
+    # Verifica se um objeto esta mais a direita que outro, ou abaixo
+    def __lt__(self, other):
+        if other.x_1 > self.x_2 or other.y_1 > self.y_2:
+            return True
+        else:
+            return False
+
+    # Subtracao significa a diferenca, ou seja, distancia de um objeto para o outro
+    def __sub__(self, other):
+        return
+
+    #TODO: reflexao: vale a pena criar uma classe so para as coordenadas??
+
 
 class ReconhecedorObjetos:
 
@@ -48,9 +82,9 @@ class ReconhecedorObjetos:
 
         for (x, y, w, h) in hands:
             cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 0), 2)
-            print(x, y, w, h, 'hand')
+            # print(x, y, w, h, 'hand')
             return x, y, w, h, 'hand'
-
+        return None
 
     def encontrar_objetos(self):
         ret, frame = self.cam.read()
@@ -72,9 +106,8 @@ class ReconhecedorObjetos:
         conf_threshold = 0.5
         nms_threshold = 0.4
 
-        # for each detection from each output layer
-        # get the confidence, class id, bounding box params
-        # and ignore weak detections (confidence < 0.5)
+        # Para cada deteccao em cada camada de saida pegar a confianca, id da classe, quadro limitante, e ignore
+        # deteccoes fracas (confianca abaixo de 50%)
         for out in outs:
             for detection in out:
                 scores = detection[5:]
@@ -96,6 +129,7 @@ class ReconhecedorObjetos:
 
         # go through the detections remaining
         # after nms and draw bounding box
+        saida = []
         for i in indices:
             i = i[0]
             box = boxes[i]
@@ -103,9 +137,11 @@ class ReconhecedorObjetos:
             y = box[1]
             w = box[2]
             h = box[3]
-            print(x, y, w, h, self.classes[class_ids[i]])
+            # print(x, y, w, h, self.classes[class_ids[i]])
+            saida.append((x, y, w, h, self.classes[class_ids[i]]))
+        return saida
 
-    def loop(self, n_iteracoes: int=None):
+    def loop(self, n_iteracoes: int = None):
         contagem = 0
         tempos = []
         while 1:
@@ -119,9 +155,33 @@ class ReconhecedorObjetos:
                 if contagem >= n_iteracoes:
                     return tempos
 
-import pandas as pd
+    def procurar_c_insistencia(self, insistencia: int = 10, quantidade_maxima: int = 3):
+        """
+        Permite buscar objetos e maos com o fator de "bouncing" no reconhecimento. Insistencia representa a tolerancia
+        a este fator.
+        :param insistencia: tolerancia ao fator de bouncing.
+        :return:
+        """
+        contagem = 0
+        saida_mao = None
+        saida_objetos = ()
+        while contagem <= insistencia:
+            coordenadas_mao = self.encontrar_mao()
+            coordenadas_objetos = self.encontrar_objetos()
+            if len(coordenadas_objetos) >= len(saida_objetos):
+                saida_objetos = coordenadas_objetos
+            if coordenadas_mao is not None:
+                saida_mao = coordenadas_mao
+            if len(saida_objetos) > quantidade_maxima and saida_mao is not None:
+                return saida_mao, saida_objetos
+            contagem += 1
+        return saida_mao, saida_objetos
 
-o = ReconhecedorObjetos()
-with o:
-    pd.DataFrame(o.loop(100)).to_csv('teste')
+# TODO: talvez criar uma classe para os objetos fisicos com suas respectivas coordenadas
 
+
+# import pandas as pd
+#
+# o = ReconhecedorObjetos()
+# with o:
+#     pd.DataFrame(o.loop(100)).to_csv('teste')

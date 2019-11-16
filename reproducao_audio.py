@@ -1,9 +1,10 @@
 from pygame import mixer  # Load the popular external library
+from enum import Enum
 
-
-class AUDIO:
+class Audio(Enum):
     _caminho_falas = 'falas\\'
     BOM_DIA = _caminho_falas + 'bom dia.mp3'
+    OBJETO_ENCONTRADO = _caminho_falas + 'objeto encontrado.mp3'
 
 
 class PlayerAudio:

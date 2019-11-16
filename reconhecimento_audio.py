@@ -21,7 +21,7 @@ def ouvir_microfone():
     return frase
 
 
-def aguarda_audio(palavras: list):
+def aguarda_audio(palavras: list) -> tuple:
     if isinstance(palavras, str):
         palavras = [palavras]
     mixer.init()
@@ -29,4 +29,5 @@ def aguarda_audio(palavras: list):
     print(frase)
     for palavra in palavras:
         if palavra in frase:
-            return True
+            return palavra
+    return None
