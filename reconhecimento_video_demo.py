@@ -167,8 +167,8 @@ class ReconhecedorObjetos:
         tempos = []
         while 1:
             comeco = time.clock()
-            self.encontrar_mao()
-            self.encontrar_objetos()
+            print(self.encontrar_mao())
+            print(self.encontrar_objetos())
             fim = time.clock()
             tempos.append(fim - comeco)
             if n_iteracoes is not None:
@@ -204,4 +204,4 @@ import pandas as pd
 
 o = ReconhecedorObjetos()
 with o:
-    pd.DataFrame(o.loop(100)).to_csv('teste')
+    o.loop()

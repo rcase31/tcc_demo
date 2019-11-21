@@ -34,7 +34,6 @@ class Assistente:
         #TODO: trabalhar nisso aqui
         self.objeto_em_mira = ObjetoAvistado()
 
-
     def procura_objetos(self):
         with self.olhos:
             self.coordenadas_mao, self.coordenadas_objetos = self.olhos.procurar_c_insistencia(30)
@@ -50,7 +49,7 @@ class Assistente:
 
     def direciona(self, objeto_em_mira: str):
         #TODO: fazer essa parte
-        pass
+        self.objeto_em_mira = objeto_em_mira
 
     def retorna_objetos_vistos(self) -> list:
         #TODO: retornar os objetos vistos em forma de lista de strings
@@ -79,6 +78,7 @@ class Assistente:
             print("Encontrei %3d objetos" % len(self.coordenadas_objetos))
         else:
             print("Nao encontrei objetos")
+
 
 if __name__ == '__main__':
     HOT_WORD = "Maiara"
